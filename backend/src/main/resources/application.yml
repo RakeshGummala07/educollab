@@ -1,0 +1,116 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: educollab-backend
+
+  # MySQL
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  # MongoDB
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${DB_NAME}
+
+    # Redis
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  # File upload limits
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      enabled: true
+
+  # Kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: educollab-notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.educollab.dto.event"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  # Email (SMTP)
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    
+
+# JWT
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION}
+
+  cors:
+    allowed-origins: ${CORS_ORIGINS}
+
+  # AWS S3 / MinIO
+  aws:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+    region: ${AWS_REGION}
+    bucket-name: ${AWS_BUCKET_NAME}
+    endpoint: ${AWS_ENDPOINT:}
+
+  # Media config
+  media:
+    max-image-size: 10485760
+    max-video-size: 52428800
+    allowed-image-types: image/jpeg,image/png,image/gif,image/webp
+    allowed-video-types: video/mp4,video/quicktime,video/x-msvideo
+  
+  # Notifications
+  notification:
+    email-enabled: ${EMAIL_NOTIFICATIONS_ENABLED:false}
+    from-address: ${MAIL_FROM:noreply@educollab.com}
+    from-name: EduCollab
+
+
+logging:
+  level:
+    com.educollab: DEBUG
+    org.springframework.security: INFO
+    software.amazon.awssdk: WARN

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>EduCollab Notification</title>
+</head>
+<body style="margin:0; padding:0; background-color:#F8FAFC; font-family: 'Segoe UI', Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8FAFC; padding: 32px 0;">
+        <tr>
+            <td align="center">
+                <table width="480" cellpadding="0" cellspacing="0"
+                       style="background:#FFFFFF; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(37,99,235,0.08);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%); padding: 28px 32px;">
+                            <span style="color:#fff; font-size:22px; font-weight:700;">🎓 EduCollab</span>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 32px;">
+                            <p style="font-size:16px; color:#0F172A; margin:0 0 16px;">
+                                Hi <strong th:text="${recipientName}">there</strong>,
+                            </p>
+
+                            <h2 style="font-size:18px; color:#0F172A; margin:0 0 8px;" th:text="${title}">
+                                Notification Title
+                            </h2>
+
+                            <p style="font-size:14px; color:#475569; line-height:1.6; margin:0 0 24px;" th:text="${message}">
+                                Notification message goes here.
+                            </p>
+
+                            <a href="https://educollab.com"
+                               style="display:inline-block; background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+                                      color:#fff; text-decoration:none; padding:12px 28px; border-radius:10px;
+                                      font-size:14px; font-weight:600;">
+                                Open EduCollab
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 32px; background:#F8FAFC; border-top:1px solid #E2E8F0;">
+                            <p style="font-size:12px; color:#94A3B8; margin:0;">
+                                You received this email because you have notifications enabled on EduCollab.
+                                You can manage your preferences anytime in Settings.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

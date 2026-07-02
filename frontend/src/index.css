@@ -1,0 +1,22 @@
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;          
+}
+
+
+* {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;        
+}
+
+
+@keyframes pulse {
+  0%   { opacity: 1;   transform: scale(1); }
+  50%  { opacity: 0.5; transform: scale(1.05); }
+  100% { opacity: 1;   transform: scale(1); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
