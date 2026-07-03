@@ -6,6 +6,11 @@ import {
   markMessagesReadByOther, receiveMessageDeleted,
 } from '../store/slices/chatSlice'
 import { receiveNotification } from '../store/slices/notificationSlice'
+import {
+  receiveMeetingChatMessage, receiveLifecycleEvent, receiveParticipantEvent,
+  receiveModerationEvent, receiveWaitingRoomRequest, approvalReceived, denialReceived,
+  joinMeetingRoom,
+} from '../store/slices/meetingSlice'
 import websocketService from '../api/websocketService'
 
 export const useWebSocketConnection = () => {
@@ -103,4 +108,55 @@ export const useConversationSubscription = (conversationId) => {
   }
 
   return { sendViaWs, sendTyping }
+}
+
+// ── Meeting room: chat, lifecycle, participants, moderation, waiting room ──
+export const useMeetingRoomSubscription = (meetingId) => {
+  const dispatch = useDispatch()
+  const wsConnected = useSelector((s) => s.chat.wsConnected)
+  const currentUser = useSelector(selectCurrentUser)
+
+  useEffect(() => {
+    if (!meetingId || !wsConnected || !currentUser?.id) return
+
+    const chatDest = `/topic/meeting/${meetingId}/chat`
+    const privateChatDest = `/topic/meeting/${meetingId}/chat/private/${currentUser.id}`
+    const lifecycleDest = `/topic/meeting/${meetingId}/lifecycle`
+    const participantsDest = `/topic/meeting/${meetingId}/participants`
+    const moderationDest = `/topic/meeting/${meetingId}/moderation`
+    const waitingRoomDest = `/topic/meeting/${meetingId}/waiting-room`
+    const myWaitingRoomDest = `/topic/meeting/${meetingId}/waiting-room/${currentUser.id}`
+
+    websocketService.runWhenConnected(() => {
+      websocketService.subscribe(chatDest, (msg) => dispatch(receiveMeetingChatMessage(msg)))
+      websocketService.subscribe(privateChatDest, (msg) => dispatch(receiveMeetingChatMessage(msg)))
+      websocketService.subscribe(lifecycleDest, (data) => dispatch(receiveLifecycleEvent(data)))
+      websocketService.subscribe(participantsDest, (data) => dispatch(receiveParticipantEvent(data)))
+      websocketService.subscribe(moderationDest, (data) => dispatch(receiveModerationEvent(data)))
+      websocketService.subscribe(waitingRoomDest, (data) => dispatch(receiveWaitingRoomRequest(data)))
+      websocketService.subscribe(myWaitingRoomDest, (data) => {
+              if (data.status === 'APPROVED') {
+                dispatch(approvalReceived())
+                dispatch(joinMeetingRoom(meetingId)) // now actually fetch the LiveKit token
+              }
+              if (data.status === 'DENIED') dispatch(denialReceived())
+        })
+    })
+
+    return () => {
+      websocketService.unsubscribe(chatDest)
+      websocketService.unsubscribe(privateChatDest)
+      websocketService.unsubscribe(lifecycleDest)
+      websocketService.unsubscribe(participantsDest)
+      websocketService.unsubscribe(moderationDest)
+      websocketService.unsubscribe(waitingRoomDest)
+      websocketService.unsubscribe(myWaitingRoomDest)
+    }
+  }, [meetingId, wsConnected, currentUser?.id, dispatch])
+
+  const sendChat = (content, recipientId = null) => {
+    websocketService.send(`/app/meeting.chat.send/${meetingId}`, { content, recipientId })
+  }
+
+  return { sendChat }
 }

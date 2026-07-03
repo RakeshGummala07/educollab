@@ -22,6 +22,8 @@ import TeachersPage       from './pages/student/TeachersPage'
 import CommunityPage      from './pages/enrollment/CommunityPage'
 import ChatPage           from './pages/chat/ChatPage'
 import NotificationsPage  from './pages/notifications/NotificationsPage'
+import MeetingsPage       from './pages/meetings/MeetingsPage'
+import MeetingRoomPage    from './pages/meetings/MeetingRoomPage'
 
 function WebSocketBridge() {
   useWebSocketConnection()
@@ -70,7 +72,8 @@ function App() {
               </RoleBasedRoute>
             } />
 
-            <Route path="/meetings" element={<ProtectedRoute><ComingSoon title="Meetings & Video" day={7} /></ProtectedRoute>} />
+            <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
+            <Route path="/meetings/:meetingId" element={<ProtectedRoute><MeetingRoomPage /></ProtectedRoute>} />
             <Route path="/ai"       element={<ProtectedRoute><ComingSoon title="AI Assistant" day={9} /></ProtectedRoute>} />
 
             <Route path="/"  element={<Navigate to="/dashboard" replace />} />

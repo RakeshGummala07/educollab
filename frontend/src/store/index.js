@@ -5,6 +5,7 @@ import feedReducer       from './slices/feedSlice'
 import enrollmentReducer from './slices/enrollmentSlice'
 import chatReducer       from './slices/chatSlice'
 import notificationReducer from './slices/notificationSlice'
+import meetingReducer     from './slices/meetingSlice'
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     enrollment: enrollmentReducer,
     chat:       chatReducer,
     notifications: notificationReducer,
+    meetings:   meetingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

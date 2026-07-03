@@ -54,6 +54,8 @@ public class Notification {
         ENROLLMENT_APPROVED,
         ENROLLMENT_REJECTED,
         STUDENT_REMOVED,
+        MEETING_SCHEDULED,
+        MEETING_STARTED,
         SYSTEM
     }
 }

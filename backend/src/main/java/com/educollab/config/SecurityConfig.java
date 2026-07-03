@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/livekit/webhook").permitAll()
                 // All other endpoints require authentication
                 // Fine-grained control via @PreAuthorize on controllers
                 .anyRequest().authenticated()
