@@ -1,0 +1,16 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50100
+  port_range_end: 50200
+  use_external_ip: false
+keys:
+  # Must match LIVEKIT_API_KEY / LIVEKIT_API_SECRET in backend/.env
+  devkey: devsecret1234567890devsecret1234567890
+# Uncomment + point at your backend to enable the /livekit/webhook fallback
+# webhook:
+#   api_key: devkey
+#   urls:
+#     - http://host.docker.internal:8080/api/livekit/webhook
+logging:
+  level: info

@@ -109,6 +109,20 @@ app:
     from-name: EduCollab
 
 
+  # LiveKit (video calls)
+  livekit:
+    api-key: ${LIVEKIT_API_KEY}
+    api-secret: ${LIVEKIT_API_SECRET}
+    server-url: ${LIVEKIT_SERVER_URL:http://localhost:7880}
+    ws-url: ${LIVEKIT_WS_URL:ws://localhost:7880}
+    webhook-verify: ${LIVEKIT_WEBHOOK_VERIFY:true}
+
+  # Meeting behavior
+  meeting:
+    attendance-threshold-seconds: 300
+    auto-end-grace-minutes: 15
+
+
 logging:
   level:
     com.educollab: DEBUG

@@ -26,7 +26,10 @@
     "socket.io-client": "^4.7.5",
     "yup": "^1.4.0",
     "@stomp/stompjs": "^7.0.0",
-    "sockjs-client": "^1.6.1"
+    "sockjs-client": "^1.6.1",
+    "livekit-client": "^2.5.7",
+    "@livekit/components-react": "^2.6.4",
+    "@livekit/components-styles": "^1.1.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
