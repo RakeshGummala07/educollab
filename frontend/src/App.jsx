@@ -24,6 +24,7 @@ import ChatPage           from './pages/chat/ChatPage'
 import NotificationsPage  from './pages/notifications/NotificationsPage'
 import MeetingsPage       from './pages/meetings/MeetingsPage'
 import MeetingRoomPage    from './pages/meetings/MeetingRoomPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 
 function WebSocketBridge() {
   useWebSocketConnection()
@@ -62,7 +63,7 @@ function App() {
             } />
             <Route path="/admin" element={
               <RoleBasedRoute allowedRoles={['ROLE_TEACHER']}>
-                <ComingSoon title="Admin Dashboard" day={8} />
+                <AdminDashboardPage />
               </RoleBasedRoute>
             } />
 

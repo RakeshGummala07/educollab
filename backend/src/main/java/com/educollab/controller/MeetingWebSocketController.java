@@ -1,14 +1,19 @@
 package com.educollab.controller;
 
 import com.educollab.dto.request.MeetingChatSendRequest;
+import com.educollab.exception.BadRequestException;
 import com.educollab.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+
+import java.util.Map;
 
 /**
  * STOMP endpoints for the meeting chat panel. Reuses the same /ws-chat
@@ -38,5 +43,15 @@ public class MeetingWebSocketController {
             return;
         }
         meetingService.sendChatMessage(auth.getName(), meetingId, request);
+    }
+
+    // Same fix as WebSocketChatController — without this, chat-mode rejections
+    // (e.g. HOST_ONLY_BROADCAST mode blocking a participant) are only logged
+    // server-side and the sender never learns their message didn't go through.
+    @MessageExceptionHandler(BadRequestException.class)
+    @SendToUser("/queue/errors")
+    public Map<String, String> handleBadRequest(BadRequestException e) {
+        log.warn("STOMP meeting chat error: {}", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 }

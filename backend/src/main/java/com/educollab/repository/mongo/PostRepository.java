@@ -33,4 +33,7 @@ public interface PostRepository extends MongoRepository<Post, String> {
     // Search posts by content
     @Query("{ 'content': { $regex: ?0, $options: 'i' }, 'deleted': false, 'published': true }")
     List<Post> searchByContent(String keyword);
+
+     // Used by admin analytics — posts by this teacher's students (+ self) in a date window
+    List<Post> findByAuthorIdInAndCreatedAtAfterAndDeletedFalse(List<Long> authorIds, java.time.LocalDateTime after);
 }
