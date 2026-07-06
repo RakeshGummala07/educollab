@@ -52,6 +52,16 @@ public class User {
     @Builder.Default
     private Boolean accountNonLocked = true;
 
+    // ── Admin moderation (Day 8) ─────────────────────────────────────────
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean chatRestricted = false;
+
+    @Column(length = 300)
+    private String chatRestrictedReason;
+
+    private LocalDateTime chatRestrictedAt;
+
     // ── Profile fields ────────────────────────────────────────────────────
     @Column(length = 500)
     private String bio;

@@ -56,6 +56,8 @@ public class Notification {
         STUDENT_REMOVED,
         MEETING_SCHEDULED,
         MEETING_STARTED,
+        CHAT_RESTRICTED,
+        CHAT_UNRESTRICTED,
         SYSTEM
     }
 }
