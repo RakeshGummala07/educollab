@@ -14,18 +14,21 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   BookmarkBorder as SaveIcon,
+  Flag as FlagIcon,
 } from '@mui/icons-material'
 import { formatDistanceToNow } from 'date-fns'
 import { toggleLike, deletePost, sharePost } from '../../store/slices/feedSlice'
 import { selectCurrentUser } from '../../store/slices/authSlice'
 import CommentSection from './CommentSection'
 import ImageLightbox from './ImageLightbox'
+import ReportContentDialog from '../admin/ReportContentDialog'
 
 import { selectMyStudents } from '../../store/slices/enrollmentSlice'
 
 const PostCard = ({ post, onEdit }) => {
   const dispatch    = useDispatch()
   const currentUser = useSelector(selectCurrentUser)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const [showComments, setShowComments] = useState(false)
   const [anchorEl, setAnchorEl]         = useState(null)
@@ -138,7 +141,7 @@ const canEdit = canDelete
             </Box>
 
             {/* More menu */}
-            {(canDelete) && (
+            {(canDelete || !isOwner) && (
               <>
                 <IconButton
                   size="small"
@@ -162,12 +165,22 @@ const canEdit = canDelete
                       <EditIcon fontSize="small" /> Edit post
                     </MenuItem>
                   )}
-                  <MenuItem
-                    onClick={handleDelete}
-                    sx={{ gap: 1, fontSize: 14, color: 'error.main' }}
-                  >
-                    <DeleteIcon fontSize="small" /> Delete
-                  </MenuItem>
+                  {canDelete && (
+                    <MenuItem
+                      onClick={handleDelete}
+                      sx={{ gap: 1, fontSize: 14, color: 'error.main' }}
+                    >
+                      <DeleteIcon fontSize="small" /> Delete
+                    </MenuItem>
+                  )}
+                  {!isOwner && (
+                    <MenuItem
+                      onClick={() => { setAnchorEl(null); setReportOpen(true) }}
+                      sx={{ gap: 1, fontSize: 14 }}
+                    >
+                      <FlagIcon fontSize="small" /> Report post
+                    </MenuItem>
+                  )}
                 </Menu>
               </>
             )}
@@ -364,6 +377,14 @@ const canEdit = canDelete
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
+      />
+
+      {/* Report dialog */}
+      <ReportContentDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        contentType="POST"
+        contentId={post.id}
       />
 
       {/* Share snackbar */}
