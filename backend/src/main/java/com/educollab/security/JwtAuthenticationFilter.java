@@ -1,11 +1,15 @@
 package com.educollab.security;
 
+import com.educollab.dto.response.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(
@@ -47,6 +52,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
                 if (jwtUtils.isTokenValid(jwt, userDetails)) {
+                    // loadUserByUsername() re-fetches from the DB on every single
+                    // request, so these flags always reflect the CURRENT state —
+                    // but nothing was actually checking them here before. A student
+                    // suspended mid-session kept full access on their existing,
+                    // still-unexpired token until it naturally expired.
+                    if (!userDetails.isAccountNonLocked() || !userDetails.isEnabled()) {
+                        log.warn("Rejected request from suspended/disabled account: {}", userEmail);
+                        writeAccountSuspendedResponse(response);
+                        return;
+                    }
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
@@ -62,5 +78,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void writeAccountSuspendedResponse(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(
+                ApiResponse.error("Your account has been suspended. Contact your teacher for details.")));
     }
 }
