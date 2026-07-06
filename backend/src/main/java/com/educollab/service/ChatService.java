@@ -158,6 +158,13 @@ public class ChatService {
 
         String content = request.getContent() == null ? "" : request.getContent().trim();
         User sender = findUser(senderEmail);
+
+        if (Boolean.TRUE.equals(sender.getChatRestricted())) {
+            throw new BadRequestException(
+                    "Your chat access has been restricted" +
+                    (sender.getChatRestrictedReason() != null ? ": " + sender.getChatRestrictedReason() : "."));
+        }
+
         Conversation conversation = findConversation(conversationId);
 
         validateParticipant(conversation, sender.getId());
