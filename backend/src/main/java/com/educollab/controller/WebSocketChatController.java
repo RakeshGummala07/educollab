@@ -5,14 +5,17 @@ import com.educollab.dto.request.SendMessageRequest;
 import com.educollab.dto.request.TypingIndicatorRequest;
 import com.educollab.dto.response.MessageResponse;
 import com.educollab.entity.User;
+import com.educollab.exception.BadRequestException;
 import com.educollab.repository.UserRepository;
 import com.educollab.service.ChatService;
 import com.educollab.service.NotificationService;
 import com.educollab.service.PresenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -55,6 +58,7 @@ public class WebSocketChatController {
 
 
         // Notify all other participants (only those NOT currently online avoid spam;
+        // here we notify everyone except the sender — frontend can ignore if window is open)
         List<Long> participantIds = chatService.getParticipantIds(conversationId);
         String preview = request.getContent() != null && request.getContent().length() > 60
                 ? request.getContent().substring(0, 60) + "..."
@@ -98,8 +102,6 @@ public class WebSocketChatController {
         log.info("Typing received: {} {}", request.getConversationId(), request.isTyping());
     }
 
-    
-
     // ── Heartbeat / presence ping ─────────────────────────────────────────
     // Client sends to: /app/chat.presence every ~20s while connected
     @MessageMapping("/chat.presence")
@@ -117,7 +119,21 @@ public class WebSocketChatController {
                 "/topic/presence",
                 Map.of("userId", user.getId(), "online", true)
         );
-        
+    }
+
+    // ── Error handling for STOMP @MessageMapping methods ───────────────────
+    // Without this, exceptions thrown in sendMessage()/etc (e.g. the chat
+    // restriction check) are only logged server-side as "unhandled exception"
+    // and the client never learns the send failed. @SendToUser resolves back
+    // to the exact session that sent the offending message (this is Spring's
+    // own session-based resolution — safe here even though our application
+    // code elsewhere avoids convertAndSendToUser(userId, ...) due to the
+    // email-vs-userId principal mismatch noted in MeetingService).
+    @MessageExceptionHandler(BadRequestException.class)
+    @SendToUser("/queue/errors")
+    public Map<String, String> handleBadRequest(BadRequestException e) {
+        log.warn("STOMP chat error: {}", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 
     // ── Helper: extract email from STOMP Principal ────────────────────────

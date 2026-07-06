@@ -39,6 +39,15 @@ export const useWebSocketConnection = () => {
         if (currentUser?.id) {
           websocketService.subscribe(`/topic/notifications/${currentUser.id}`, (notif) => {
             dispatch(receiveNotification(notif))
+
+            // A restriction is significant enough that a silent bell update
+            // isn't enough — surface it immediately as a toast too.
+            if (notif.type === 'CHAT_RESTRICTED') {
+              toast.warn(notif.message || 'Your chat access has been restricted', { autoClose: 8000 })
+            }
+            if (notif.type === 'CHAT_UNRESTRICTED') {
+              toast.success(notif.message || 'Your chat access has been restored')
+            }
           })
         }
       })
