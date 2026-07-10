@@ -47,6 +47,9 @@ public class S3Service {
     private static final List<String> ALLOWED_VIDEO_TYPES =
             Arrays.asList("video/mp4", "video/quicktime", "video/x-msvideo");
 
+    private static final List<String> ALLOWED_DOCUMENT_TYPES =
+            Arrays.asList("application/pdf");
+
     // ── Upload image ──────────────────────────────────────────────────────
     public String uploadImage(MultipartFile file, String folder) {
         if (!ALLOWED_IMAGE_TYPES.contains(file.getContentType())) {
@@ -73,10 +76,31 @@ public class S3Service {
         return uploadFile(file, folder);
     }
 
-    // ── Core upload ───────────────────────────────────────────────────────
+    // ── Upload document (PDF) ────────────────────────────────────────────
+    // Separate from uploadFile()/validateFile() on purpose: those are
+    // image/video-only (used by the post service). Study-document uploads
+    // (DocumentIngestionService) need PDFs to succeed, so this bypasses
+    // validateFile() entirely and does its own PDF-specific check.
+    public String uploadDocument(MultipartFile file, String folder) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File cannot be empty");
+        }
+        if (!ALLOWED_DOCUMENT_TYPES.contains(file.getContentType())) {
+            throw new BadRequestException("Invalid document type. Allowed: PDF");
+        }
+        return uploadFileInternal(file, folder);
+    }
+
+    // ── Core upload (generic entrypoint, image/video only) ─────────────────
     public String uploadFile(MultipartFile file, String folder) {
         validateFile(file);
+        return uploadFileInternal(file, folder);
+    }
 
+    // ── Shared S3 put logic, no content-type validation ─────────────────────
+    // Callers (uploadImage/uploadVideo/uploadDocument/uploadFile) are
+    // responsible for validating content type before calling this.
+    private String uploadFileInternal(MultipartFile file, String folder) {
         String fileName    = generateFileName(file.getOriginalFilename());
         String s3Key       = folder + "/" + fileName;
         String contentType = file.getContentType();
@@ -158,7 +182,7 @@ public class S3Service {
         return fileUrl.replace(prefix, "");
     }
 
-    // ── Validation ────────────────────────────────────────────────────────
+    // ── Validation (image/video only — used by uploadFile()) ────────────────
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("File cannot be empty");
