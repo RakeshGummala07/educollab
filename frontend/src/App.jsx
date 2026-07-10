@@ -8,7 +8,6 @@ import { store }          from './store'
 import { theme }          from './utils/theme'
 import ProtectedRoute     from './components/common/ProtectedRoute'
 import RoleBasedRoute     from './components/common/RoleBasedRoute'
-import ComingSoon         from './components/common/ComingSoon'
 import { useWebSocketConnection } from './hooks/useWebSocket'   // ← THIS LINE MUST EXIST
 
 import LoginPage          from './pages/auth/LoginPage'
@@ -25,6 +24,7 @@ import NotificationsPage  from './pages/notifications/NotificationsPage'
 import MeetingsPage       from './pages/meetings/MeetingsPage'
 import MeetingRoomPage    from './pages/meetings/MeetingRoomPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AiAssistantPage    from './pages/ai/AiAssistantPage'
 
 function WebSocketBridge() {
   useWebSocketConnection()
@@ -75,7 +75,7 @@ function App() {
 
             <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/:meetingId" element={<ProtectedRoute><MeetingRoomPage /></ProtectedRoute>} />
-            <Route path="/ai"       element={<ProtectedRoute><ComingSoon title="AI Assistant" day={9} /></ProtectedRoute>} />
+            <Route path="/ai"       element={<ProtectedRoute><AiAssistantPage /></ProtectedRoute>} />
 
             <Route path="/"  element={<Navigate to="/dashboard" replace />} />
             <Route path="*"  element={<Navigate to="/dashboard" replace />} />
