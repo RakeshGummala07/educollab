@@ -75,8 +75,25 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     cache: false
-    
 
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      base-url: ${OPENAI_BASE_URL:https://generativelanguage.googleapis.com/v1beta/openai}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gemini-2.5-flash}
+          temperature: 0.6
+      embedding:
+        options:
+          model: ${OPENAI_EMBEDDING_MODEL:gemini-embedding-001}
+    vectorstore:
+      qdrant:
+        host: ${QDRANT_HOST:localhost}
+        port: ${QDRANT_PORT:6334}
+        collection-name: educollab-documents
+        initialize-schema: true
+    
 # JWT
 app:
   jwt:
@@ -108,7 +125,6 @@ app:
     from-address: ${MAIL_FROM:noreply@educollab.com}
     from-name: EduCollab
 
-
   # LiveKit (video calls)
   livekit:
     api-key: ${LIVEKIT_API_KEY}
@@ -122,6 +138,11 @@ app:
     attendance-threshold-seconds: 300
     auto-end-grace-minutes: 15
 
+  # AI Assistant token quota — resets on a rolling window PLUS a hard daily cap
+  ai-quota:
+    window-hours: 5
+    window-token-limit: 50000
+    daily-token-limit: 150000
 
 logging:
   level:
