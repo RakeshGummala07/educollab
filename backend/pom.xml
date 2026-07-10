@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
+        <version>3.3.5</version>
         <relativePath/>
     </parent>
 
@@ -23,7 +23,20 @@
         <jjwt.version>0.12.5</jjwt.version>
         <aws.sdk.version>2.25.27</aws.sdk.version>
         <livekit.version>0.13.0</livekit.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot Core -->
@@ -106,6 +119,24 @@
             <groupId>io.livekit</groupId>
             <artifactId>livekit-server</artifactId>
             <version>${livekit.version}</version>
+        </dependency>
+
+        <!-- Spring AI — OpenAI chat + embeddings -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
+        <!-- Spring AI — Qdrant vector store (RAG) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-qdrant</artifactId>
+        </dependency>
+
+        <!-- Spring AI — PDF document reader (for PDF Q&A / RAG ingestion) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
         </dependency>
 
         <!-- JWT -->
