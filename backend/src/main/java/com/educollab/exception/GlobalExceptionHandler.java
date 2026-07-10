@@ -1,6 +1,7 @@
 package com.educollab.exception;
 
 import com.educollab.dto.response.ApiResponse;
+import com.educollab.dto.response.TokenQuotaErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,6 +86,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleLocked(LockedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("Account is locked. Please contact support."));
+    }
+
+    @ExceptionHandler(com.educollab.exception.TokenQuotaExceededException.class)
+    public ResponseEntity<ApiResponse<TokenQuotaErrorResponse>> handleTokenQuotaExceeded(
+            com.educollab.exception.TokenQuotaExceededException ex) {
+        long secondsUntilReset = Math.max(0, Duration.between(LocalDateTime.now(), ex.getResetAt()).getSeconds());
+        TokenQuotaErrorResponse data = TokenQuotaErrorResponse.builder()
+                .resetAt(ex.getResetAt())
+                .secondsUntilReset(secondsUntilReset)
+                .windowExhausted(ex.isWindowExhausted())
+                .dailyExhausted(ex.isDailyExhausted())
+                .build();
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.<TokenQuotaErrorResponse>builder()
+                        .success(false)
+                        .message(ex.getMessage())
+                        .data(data)
+                        .build());
     }
 
     @ExceptionHandler(Exception.class)
