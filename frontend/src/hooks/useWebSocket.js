@@ -6,6 +6,7 @@ import {
   markMessagesReadByOther, receiveMessageDeleted,
 } from '../store/slices/chatSlice'
 import { receiveNotification } from '../store/slices/notificationSlice'
+import { receiveDocumentStatusUpdate } from '../store/slices/aiSlice'
 import {
   receiveMeetingChatMessage, receiveLifecycleEvent, receiveParticipantEvent,
   receiveModerationEvent, receiveWaitingRoomRequest, approvalReceived, denialReceived,
@@ -47,7 +48,12 @@ export const useWebSocketConnection = () => {
             }
             if (notif.type === 'CHAT_UNRESTRICTED') {
               toast.success(notif.message || 'Your chat access has been restored')
-            }
+            }          
+          })
+
+          // Live document ingestion status (PDF processing PROCESSING → READY/FAILED)
+          websocketService.subscribe(`/topic/documents/${currentUser.id}`, (doc) => {
+            dispatch(receiveDocumentStatusUpdate(doc))
           })
         }
       })
