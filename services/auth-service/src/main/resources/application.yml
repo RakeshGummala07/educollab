@@ -1,0 +1,50 @@
+server:
+  port: ${AUTH_SERVICE_PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${AUTH_DB_NAME:educollab_auth}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: ${DB_USERNAME:educollab}
+    password: ${DB_PASSWORD:educollab123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:86400000}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.educollab.auth: DEBUG
+    org.springframework.security: INFO
