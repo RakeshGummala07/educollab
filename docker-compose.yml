@@ -115,7 +115,7 @@ services:
     ports:
       - "7880:7880"   # HTTP/WebSocket signaling
       - "7881:7881"   # RTC TCP fallback
-      - "50100-50200:50100-50200/udp"   # WebRTC media (narrow range for local dev)
+      - "50000-50100:50000-50100/udp"   # WebRTC media (narrow range for local dev)
     volumes:
       - ./docker/livekit.yaml:/etc/livekit.yaml
     networks:
@@ -146,7 +146,36 @@ services:
       test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
       timeout: 5s
       retries: 5
+    networks:
+      - educollab-network
 
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: educollab-auth-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      AUTH_SERVICE_PORT: 8081
+      DB_HOST: mysql
+      DB_PORT: 3306
+      AUTH_DB_NAME: educollab_auth
+      DB_USERNAME: educollab
+      DB_PASSWORD: educollab123
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_EXPIRATION: 86400000
+      JWT_REFRESH_EXPIRATION: 604800000
+      EUREKA_URL: http://discovery-server:8761/eureka
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      timeout: 5s
+      retries: 5
     networks:
       - educollab-network
 
