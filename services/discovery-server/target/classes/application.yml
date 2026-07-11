@@ -1,0 +1,34 @@
+server:
+  port: ${DISCOVERY_SERVER_PORT:8761}
+
+spring:
+  application:
+    name: discovery-server
+
+eureka:
+  client:
+    # This service IS the registry — it must not try to register itself
+    # with itself or fetch a registry from itself. Every other microservice
+    # will have these both set to true (the default) instead.
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Dev-friendly: don't wait the default 90s before evicting stale
+    # instances, and don't self-preserve (which would mask real outages
+    # while you're actively starting/stopping services during development).
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN
