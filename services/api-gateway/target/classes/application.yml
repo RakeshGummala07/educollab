@@ -1,0 +1,73 @@
+server:
+  # NOTE: the monolith backend still runs on 8080 during this migration
+  # (kept as the working reference app — see services/README.md). The
+  # gateway runs on 9000 instead to avoid a port clash. Once the migration
+  # is complete and the monolith is retired, this can move to 8080 and
+  # the frontend's Vite proxy target updated to point here.
+  port: ${GATEWAY_PORT:9000}
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # ── Auth Service ────────────────────────────────────────────
+        - id: auth-service-auth
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+
+        - id: auth-service-users
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/users/**
+
+      # Global CORS is handled by the CorsWebFilter bean in CorsConfig.java
+      # instead of this section, to avoid double-configuring/conflicting
+      # CORS behavior between the two mechanisms.
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+        pool:
+          # Disables Reactor Netty's connection pooling/keep-alive reuse.
+          # Without this, pooled connections to downstream services can be
+          # silently killed by Docker's network layer (especially on
+          # Windows/WSL2 + Docker Desktop) — Netty then tries to reuse a
+          # dead connection, which surfaces to the client as "Empty reply
+          # from server" specifically on proxied POST/body requests, while
+          # GETs and direct-to-service calls work fine. Costs a small
+          # amount of latency (new connection per request) but is the
+          # standard fix for this class of issue in local dev.
+          type: DISABLED
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+app:
+  jwt:
+    # MUST match Auth Service's secret exactly — see JwtValidationUtil
+    secret: ${JWT_SECRET}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.educollab.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO

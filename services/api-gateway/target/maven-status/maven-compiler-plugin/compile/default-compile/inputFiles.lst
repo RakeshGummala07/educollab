@@ -1,0 +1,5 @@
+D:\Projects\educollab\services\api-gateway\src\main\java\com\educollab\gateway\ApiGatewayApplication.java
+D:\Projects\educollab\services\api-gateway\src\main\java\com\educollab\gateway\config\CorsConfig.java
+D:\Projects\educollab\services\api-gateway\src\main\java\com\educollab\gateway\filter\AuthenticationFilter.java
+D:\Projects\educollab\services\api-gateway\src\main\java\com\educollab\gateway\filter\JwtValidationUtil.java
+D:\Projects\educollab\services\api-gateway\src\main\java\com\educollab\gateway\filter\RouteValidator.java

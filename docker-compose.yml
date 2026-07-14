@@ -179,6 +179,30 @@ services:
     networks:
       - educollab-network
 
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: educollab-api-gateway
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+    environment:
+      GATEWAY_PORT: 9000
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      CORS_ORIGINS: http://localhost:5173
+      EUREKA_URL: http://discovery-server:8761/eureka
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/actuator/health"]
+      timeout: 5s
+      retries: 5
+    networks:
+      - educollab-network
+
 volumes:
   mysql_data:
   mongo_data:

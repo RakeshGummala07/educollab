@@ -1,0 +1,5 @@
+com\educollab\gateway\ApiGatewayApplication.class
+com\educollab\gateway\filter\RouteValidator.class
+com\educollab\gateway\config\CorsConfig.class
+com\educollab\gateway\filter\AuthenticationFilter.class
+com\educollab\gateway\filter\JwtValidationUtil.class
